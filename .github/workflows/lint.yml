@@ -1,0 +1,28 @@
+name: Lint
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  eslint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Add ESLint if not present
+        run: |
+          if ! grep -q "eslint" package.json; then
+            npm install --save-dev eslint @nuxtjs/eslint-config
+            echo '{"extends": ["@nuxtjs"]}' > .eslintrc
+          fi
+      - name: Run ESLint
+        run: npx eslint --ext .js,.vue .
